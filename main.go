@@ -8,7 +8,7 @@ import (
 	"hash"
 	"image"
 	"io"
-	"net/http"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -42,10 +42,10 @@ func LoadUniPDFLicense() error {
 
 func main() {
 	if err := LoadUniPDFLicense(); err != nil {
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 	if err := sign(); err != nil {
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 }
 
@@ -110,13 +110,12 @@ func sign() error {
 	signature := model.NewPdfSignature(handler)
 	signature.SetDate(now, "")
 
-	c := http.Client{}
-	resp, err := c.Get("https://www.freepnglogos.com/uploads/signature-png/signature-download-clip-art-20.png")
+	file, err := os.Open("./signature.png")
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
-	sigImage, _, err := image.Decode(resp.Body)
+	defer file.Close()
+	sigImage, _, err := image.Decode(file)
 	if err != nil {
 		return err
 	}
